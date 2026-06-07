@@ -7,6 +7,8 @@ Implementação de um **Twitter simplificado** com 3 réplicas (P0, P1, P2) para
 
 ### 🌐 Visualização interativa (ao vivo)
 
+[![EC vs CC — reply órfã e bufferização com Vector Clocks](docs/preview.png)](https://leonardopcavalcanti.github.io/distributed-twitter-consistency/)
+
 **[leonardopcavalcanti.github.io/distributed-twitter-consistency](https://leonardopcavalcanti.github.io/distributed-twitter-consistency/)** — simulador web que mostra, passo a passo, as 3 réplicas e seus Vector Clocks: alterne entre EC e CC e veja a **reply órfã** surgir na consistência eventual e ser **bufferizada** na causal.
 
 > A visualização (em [`viz/`](viz/)) reexecuta a mesma lógica (Vector Clocks + buffer causal) em TypeScript, rodando 100% no navegador. Ótima como apoio didático para a disciplina de Sistemas Distribuídos.
