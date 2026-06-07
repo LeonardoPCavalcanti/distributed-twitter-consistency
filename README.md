@@ -5,6 +5,12 @@ Implementação de um **Twitter simplificado** com 3 réplicas (P0, P1, P2) para
 - **EC (Eventual Consistency)**: permite que uma *reply* chegue antes do post pai ⇒ aparece como **reply órfã**.
 - **CC (Causal Consistency)**: usa **Relógio Vetorial** + **buffer** ⇒ *reply* só é entregue quando as **dependências causais** estiverem satisfeitas (não existe reply órfã).
 
+### 🌐 Visualização interativa (ao vivo)
+
+**[leonardopcavalcanti.github.io/distributed-twitter-consistency](https://leonardopcavalcanti.github.io/distributed-twitter-consistency/)** — simulador web que mostra, passo a passo, as 3 réplicas e seus Vector Clocks: alterne entre EC e CC e veja a **reply órfã** surgir na consistência eventual e ser **bufferizada** na causal.
+
+> A visualização (em [`viz/`](viz/)) reexecuta a mesma lógica (Vector Clocks + buffer causal) em TypeScript, rodando 100% no navegador. Ótima como apoio didático para a disciplina de Sistemas Distribuídos.
+
 ---
 
 ## Estrutura do projeto
