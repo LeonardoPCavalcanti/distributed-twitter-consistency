@@ -15,6 +15,46 @@ Implementação de um **Twitter simplificado** com 3 réplicas (P0, P1, P2) para
 
 ---
 
+## O que este projeto ensina
+
+> Em um sistema distribuído **não existe relógio global** nem ordem natural dos eventos: cada réplica só conhece o que viu até agora. Este projeto torna visível como recuperar a **ordem causal** mesmo sem um relógio compartilhado — e o que acontece quando você não a recupera.
+
+### 1. A relação "aconteceu-antes" (happened-before)
+Definida por **Lamport (1978)**, escreve-se `a → b` ("a aconteceu antes de b") quando:
+1. `a` e `b` são do mesmo processo e `a` veio primeiro; ou
+2. `a` é o **envio** de uma mensagem e `b` é o **recebimento** dela; ou
+3. por transitividade (`a → b` e `b → c` ⇒ `a → c`).
+
+Um *post* e a *reply* que o responde têm uma dependência causal: `post → reply`. Se uma réplica entrega a reply **antes** do post, ela violou a causalidade — é a **reply órfã**.
+
+### 2. Relógio Vetorial (Vector Clock)
+Cada réplica mantém um vetor com um contador por réplica, ex.: `[P0, P1, P2]`.
+- Ao gerar um evento local, incrementa **sua própria** posição.
+- Ao enviar, anexa uma cópia do vetor à mensagem.
+- Ao receber, faz o **máximo elemento-a-elemento** entre o seu vetor e o da mensagem.
+
+A grande propriedade: comparando dois vetores dá para saber se `a → b`, `b → a`, ou se são **concorrentes** (nenhum causou o outro) — algo que um único contador (relógio de Lamport escalar) não consegue distinguir.
+
+### 3. A condição de entrega causal (causal delivery)
+Na versão **CC**, uma reply de `Pj` com relógio `VC_msg` só é **entregue** quando a réplica local já viu **todas as dependências**:
+```
+VC_msg[j] == VC_local[j] + 1     (é a próxima mensagem esperada de Pj)
+VC_msg[k] <= VC_local[k]   ∀k≠j  (já vi tudo de que esta mensagem depende)
+```
+Se a condição falha, a mensagem vai para um **buffer** e é re-testada a cada nova entrega — até que o post pai chegue. Por isso, em CC, **nunca há reply órfã**.
+
+### 4. O trade-off que o projeto demonstra
+- **EC (eventual):** entrega imediata, máxima disponibilidade, mas pode mostrar estados que violam causalidade (a reply órfã). As réplicas convergem *eventualmente*.
+- **CC (causal):** preserva a ordem de causa-e-efeito, ao custo de **segurar** mensagens no buffer (latência). É o ponto-ótimo para timelines, chats e comentários, onde "resposta antes da pergunta" é inaceitável.
+
+Este é, em miniatura, o mesmo dilema **consistência × disponibilidade × latência** que governa bancos distribuídos reais.
+
+**Leituras de referência:**
+- Leslie Lamport (1978) — [*Time, Clocks, and the Ordering of Events in a Distributed System*](https://lamport.azurewebsites.net/pubs/time-clocks.pdf).
+- Tanenbaum & Van Steen — *Distributed Systems*, capítulo de relógios lógicos e consistência.
+
+---
+
 ## Estrutura do projeto
 
 ```
