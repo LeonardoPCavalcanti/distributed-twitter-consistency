@@ -5,7 +5,7 @@ Implementação de um **Twitter simplificado** com 3 réplicas (P0, P1, P2) para
 - **EC (Eventual Consistency)**: permite que uma *reply* chegue antes do post pai ⇒ aparece como **reply órfã**.
 - **CC (Causal Consistency)**: usa **Relógio Vetorial** + **buffer** ⇒ *reply* só é entregue quando as **dependências causais** estiverem satisfeitas (não existe reply órfã).
 
-### 🌐 Visualização interativa (ao vivo)
+### Visualização interativa (ao vivo)
 
 [![EC vs CC — reply órfã e bufferização com Vector Clocks](docs/preview.png)](https://leonardopcavalcanti.github.io/distributed-twitter-consistency/)
 
@@ -48,6 +48,30 @@ Se a condição falha, a mensagem vai para um **buffer** e é re-testada a cada 
 - **CC (causal):** preserva a ordem de causa-e-efeito, ao custo de **segurar** mensagens no buffer (latência). É o ponto-ótimo para timelines, chats e comentários, onde "resposta antes da pergunta" é inaceitável.
 
 Este é, em miniatura, o mesmo dilema **consistência × disponibilidade × latência** que governa bancos distribuídos reais.
+
+### O cenário, desenhado
+
+A mesma sequência de mensagens — P0 posta, P1 responde — chegando **fora de ordem** em P2:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant P0 as P0 (posta)
+    participant P1 as P1 (responde)
+    participant P2 as P2 (observa)
+
+    P0->>P1: post "Oi!" — VC [1,0,0]
+    Note over P1: entrega o post<br/>VC local: [1,1,0] ao responder
+    P1-->>P2: reply "Oi de volta!" — VC [1,1,0] (chega PRIMEIRO)
+    P0-->>P2: post "Oi!" — VC [1,0,0] (chega DEPOIS, atrasado)
+
+    rect rgb(60, 25, 30)
+        Note over P2: EC — entrega imediata:<br/>reply aparece SEM o post pai (reply órfã)
+    end
+    rect rgb(20, 45, 40)
+        Note over P2: CC — verifica VC [1,1,0]: depende de P0=1,<br/>mas VC local é [0,0,0] → BUFFERIZA.<br/>Post chega → entrega post, drena buffer → reply.<br/>Ordem causal preservada.
+    end
+```
 
 **Leituras de referência:**
 - Leslie Lamport (1978) — [*Time, Clocks, and the Ordering of Events in a Distributed System*](https://lamport.azurewebsites.net/pubs/time-clocks.pdf).
