@@ -56,6 +56,7 @@ export default function App() {
             href="https://github.com/LeonardoPCavalcanti/distributed-twitter-consistency"
             target="_blank"
             rel="noreferrer"
+            aria-label="Repositório do projeto no GitHub"
             className="flex items-center gap-1.5 rounded-lg border border-line px-3 py-1.5 text-sm text-muted transition-colors hover:border-p0/40 hover:text-white"
           >
             <Github size={16} /> <span className="hidden sm:inline">Código</span>
